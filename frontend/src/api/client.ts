@@ -1,6 +1,7 @@
 import { AppSummary, GuideResponse, ResearchRun } from './types';
 
-const API_BASE = '/api';
+const VITE_API = (import.meta as { env?: Record<string, string> }).env?.VITE_API_URL;
+const API_BASE = VITE_API ? `${VITE_API.replace(/\/$/, '')}/api` : '/api';
 
 async function handleResponse<T>(res: Response, defaultMessage: string): Promise<T> {
   if (!res.ok) {
