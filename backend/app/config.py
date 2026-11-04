@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     
     TAVILY_API_KEY: str = ""
     
-    AI_PROVIDER_ORDER: str = "openrouter,groq"
+    AI_PROVIDER_ORDER: str = "groq,openrouter"
     
     API_TIMEOUT_SECONDS: int = 60
     MAX_RESEARCH_PAGES: int = 8

@@ -5,6 +5,7 @@ from unittest.mock import patch, AsyncMock
 import pytest
 from fastapi.testclient import TestClient
 
+from app.config import settings
 from app.main import app
 from app.database import SessionLocal
 from app.models.app import App
@@ -236,15 +237,18 @@ async def test_qa_llm_timeout_triggers_groq_fallback():
         "sources": [{"id": "src_01", "title": "Doc", "url": "https://testapp.com/docs"}]
     }).model_dump()
 
-    router.providers["openrouter"] = MockProvider("openrouter", error="Request timed out after 25s")
-    router.providers["groq"] = MockProvider("groq", response=sample_guide)
+    primary_name = settings.provider_order[0]
+    secondary_name = settings.provider_order[1] if len(settings.provider_order) > 1 else "openrouter"
+
+    router.providers[primary_name] = MockProvider(primary_name, error="Request timed out after 25s")
+    router.providers[secondary_name] = MockProvider(secondary_name, response=sample_guide)
 
     guide, provider_used, model_used, fallback_reason = await router.generate_structured_guide({
         "app_name": "TestApp",
         "provider_domain": "testapp.com",
     })
     assert guide is not None
-    assert provider_used == "groq"
+    assert provider_used == secondary_name
     assert "Request timed out" in fallback_reason
 
 @pytest.mark.asyncio

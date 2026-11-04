@@ -8,9 +8,9 @@ The product combines a searchable catalog of verified reference guides with an a
 
 ## 1. Key Architectural & Product Decisions
 
-### 1. Dual-Provider LLM Fallback (OpenRouter $\rightarrow$ Groq)
-* **Primary LLM:** OpenRouter routing to `meta-llama/llama-3.3-70b-instruct` for structured extraction and nuanced scope analysis.
-* **Secondary LLM (Automatic Failover):** Groq routing to `llama-3.3-70b-versatile` for high-throughput, low-latency backup.
+### 1. Dual-Provider LLM Fallback (Groq $\rightarrow$ OpenRouter)
+* **Primary LLM:** Groq routing to `llama-3.3-70b-versatile` on ultra-fast LPU inference hardware ($\approx$10–15s structured synthesis).
+* **Secondary LLM (Automatic Failover):** OpenRouter routing to `meta-llama/llama-3.3-70b-instruct` for high-fidelity fallback.
 * **Resilience Behavior:** The router catches HTTP 429 rate limits, connection timeouts, and provider downtime. If an LLM returns malformed JSON, a targeted repair attempt is executed before failing safely. The system never fabricates unverified data if both models fail.
 
 ### 2. Tavily Search & Deterministic Documentation Discovery

@@ -1,6 +1,7 @@
 import time
 from unittest.mock import patch, AsyncMock
 import pytest
+from app.config import settings
 from app.services.llm.base import LLMProvider
 from app.services.llm.router import LLMRouter, llm_router
 from app.services.llm.heuristic_fallback import generate_heuristic_guide
@@ -52,18 +53,20 @@ class MockWorkingProvider(LLMProvider):
 
 @pytest.mark.asyncio
 async def test_llm_router_fallback_on_primary_failure():
-    """Validates that when primary provider (OpenRouter) fails with 429/timeout, Groq is invoked."""
+    """Validates that when primary provider fails with 429/timeout, fallback provider is invoked."""
     router = LLMRouter()
     
-    # Configure primary failing, secondary working
     sample_guide = generate_heuristic_guide({
         "app_name": "TestApp",
         "provider_domain": "testapp.com",
         "sources": [{"id": "src_01", "title": "Test Doc", "url": "https://testapp.com/docs"}]
     }).model_dump()
 
-    router.providers["openrouter"] = MockFailingProvider("openrouter", "Rate limit 429: Too Many Requests")
-    router.providers["groq"] = MockWorkingProvider("groq", sample_guide)
+    primary_name = settings.provider_order[0]
+    secondary_name = settings.provider_order[1] if len(settings.provider_order) > 1 else "openrouter"
+
+    router.providers[primary_name] = MockFailingProvider(primary_name, "Rate limit 429: Too Many Requests")
+    router.providers[secondary_name] = MockWorkingProvider(secondary_name, sample_guide)
 
     guide, provider_used, model_used, fallback_reason = await router.generate_structured_guide({
         "app_name": "TestApp",
@@ -71,7 +74,7 @@ async def test_llm_router_fallback_on_primary_failure():
     })
 
     assert guide is not None
-    assert provider_used == "groq"
+    assert provider_used == secondary_name
     assert "Rate limit 429" in fallback_reason
     assert guide.app.name == "TestApp"
 
