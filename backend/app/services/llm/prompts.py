@@ -24,7 +24,7 @@ def build_research_prompt(evidence_package: dict, repair_feedback: str = None) -
     sources_text = ""
     for idx, s in enumerate(sources):
         sources_text += f"\n--- SOURCE [{s['id']}] {s['title']} ({s['url']}) ---\n"
-        sources_text += s.get("content", "")[:6000]
+        sources_text += s.get("content", "")[:3500]
         sources_text += "\n"
 
     prompt = f"""Target Application: {app_name}

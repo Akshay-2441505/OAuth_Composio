@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     
     AI_PROVIDER_ORDER: str = "openrouter,groq"
     
-    API_TIMEOUT_SECONDS: int = 25
+    API_TIMEOUT_SECONDS: int = 60
     MAX_RESEARCH_PAGES: int = 8
     MAX_PAGE_BYTES: int = 1500000
 

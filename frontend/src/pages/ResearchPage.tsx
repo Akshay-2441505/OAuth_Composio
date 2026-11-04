@@ -60,7 +60,7 @@ export const ResearchPage: React.FC = () => {
 
     let isMounted = true;
     let pollCount = 0;
-    const MAX_POLLS = 60; // 60 * 1.5s = 90s timeout protection
+    const MAX_POLLS = 100; // 100 * 1.5s = 150s timeout protection
     let pollInterval: ReturnType<typeof setInterval>;
 
     const poll = async () => {
@@ -72,10 +72,14 @@ export const ResearchPage: React.FC = () => {
 
           // Stop polling if completed or failed
           if (runData.status === 'completed' || runData.status === 'failed') {
+            setPollTimeoutWarning(false);
             clearInterval(pollInterval);
           } else if (pollCount >= MAX_POLLS) {
             setPollTimeoutWarning(true);
             clearInterval(pollInterval);
+          } else if (pollCount >= 40) {
+            // Show subtle informational warning if >60s while still polling
+            setPollTimeoutWarning(true);
           }
         }
       } catch (err: unknown) {
